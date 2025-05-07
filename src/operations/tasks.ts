@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { fetchWithAuth } from "../lib/fetchWithAuth.js";
 
-export const GetTasksSchema = z.object({ list: z.undefined() });
+export const GetTasksSchema = z.object({});
 export const GetTaskDetailSchema = z.object({ taskId: z.string() });
 export const GetTaskRepositorySchema = z.object({ taskId: z.string() });
 export const StartTaskSchema = z.object({ taskId: z.string() });
