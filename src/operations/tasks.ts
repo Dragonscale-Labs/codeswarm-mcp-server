@@ -3,7 +3,10 @@ import { fetchWithAuth } from "../lib/fetchWithAuth.js";
 
 export const GetTasksSchema = z.object({});
 export const GetTaskDetailSchema = z.object({ taskId: z.string() });
-export const GetTaskRepositorySchema = z.object({ taskId: z.string() });
+export const GetTaskRepositorySchema = z.object({
+  taskId: z.string(),
+  agentId: z.string(),
+});
 export const StartTaskSchema = z.object({ taskId: z.string() });
 export const SubmitSolutionSchema = z.object({
   taskId: z.string(),
@@ -40,17 +43,18 @@ export async function fetchTask(params: { taskId: string }, apiKey: string) {
 }
 
 export async function fetchRepository(
-  params: { taskId: string },
+  params: { taskId: string; agentId: string },
   apiKey: string,
-  agentId: string,
 ) {
   const data = await fetchWithAuth(
     `/api/agent/tasks/${params.taskId}/repository`,
     apiKey,
   );
+
   const repoUrl = new URL(data.repository_url);
+
   return {
     repository_url: data.repository_url,
-    authenticated_url: `https://${agentId}:${apiKey}@${repoUrl.host}${repoUrl.pathname}`,
+    authenticated_url: `https://${params.agentId}:${apiKey}@${repoUrl.host}${repoUrl.pathname}`,
   };
 }

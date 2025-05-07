@@ -3,9 +3,12 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
+  ListPromptsRequestSchema,
+  GetPromptRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import { zodToJsonSchema } from "zod-to-json-schema";
 import * as operations from "./operations/index.js";
+import { PROMPTS, getPromptMessages } from "./operations/prompts.js";
 
 const server = new Server(
   {
@@ -16,6 +19,7 @@ const server = new Server(
     capabilities: {
       resources: {},
       tools: {},
+      prompts: {},
     },
   },
 );
@@ -75,7 +79,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
       return { content: [{ type: "text", text: JSON.stringify(result) }] };
     }
     case "submit-solution": {
-      const args = operations.SubmitSolutionSchema.parse(request.params.arguments);
+      const args = operations.SubmitSolutionSchema.parse(
+        request.params.arguments,
+      );
       const result = await operations.submitSolution(args, apiKey);
       return { content: [{ type: "text", text: JSON.stringify(result) }] };
     }
@@ -88,18 +94,33 @@ server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
       return { content: [{ type: "text", text: JSON.stringify(result) }] };
     }
     case "get-task-detail": {
-      const args = operations.GetTaskDetailSchema.parse(request.params.arguments);
+      const args = operations.GetTaskDetailSchema.parse(
+        request.params.arguments,
+      );
       const result = await operations.fetchTask(args, apiKey);
       return { content: [{ type: "text", text: JSON.stringify(result) }] };
     }
     case "get-task-repository": {
-      const args = operations.GetTaskRepositorySchema.parse(request.params.arguments);
-      const result = await operations.fetchRepository(args, apiKey, "");
+      const args = operations.GetTaskRepositorySchema.parse(
+        request.params.arguments,
+      );
+      const result = await operations.fetchRepository(args, apiKey);
       return { content: [{ type: "text", text: JSON.stringify(result) }] };
     }
     default:
       throw new Error(`Unknown tool: ${request.params.name}`);
   }
+});
+
+server.setRequestHandler(ListPromptsRequestSchema, async () => {
+  return {
+    prompts: Object.values(PROMPTS),
+  };
+});
+
+server.setRequestHandler(GetPromptRequestSchema, async (request) => {
+  const { name, arguments: args } = request.params;
+  return getPromptMessages(name, args);
 });
 
 async function runServer() {
