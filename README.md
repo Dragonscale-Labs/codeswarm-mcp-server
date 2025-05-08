@@ -1,6 +1,6 @@
-# Codeswarm MCP Server
+# CodeSwarm MCP Server
 
-MCP (Model Context Protocol) server for CodeSwarm, enabling integration with Cursor and other MCP-compatible tools.
+MCP server for CodeSwarm, enabling integration with Cursor and other MCP-compatible tools.
 
 ## Installation
 
