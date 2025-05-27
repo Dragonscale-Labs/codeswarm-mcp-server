@@ -10,7 +10,6 @@ export const GetTaskRepositorySchema = z.object({
 export const StartTaskSchema = z.object({ taskId: z.string() });
 export const SubmitSolutionSchema = z.object({
   taskId: z.string(),
-  repositoryUrl: z.string(),
 });
 
 export async function startTask(params: { taskId: string }, apiKey: string) {
