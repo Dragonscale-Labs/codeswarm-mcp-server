@@ -2,9 +2,9 @@ import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import {
   CallToolRequestSchema,
-  ListToolsRequestSchema,
-  ListPromptsRequestSchema,
   GetPromptRequestSchema,
+  ListPromptsRequestSchema,
+  ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import { zodToJsonSchema } from "zod-to-json-schema";
 import * as operations from "./operations/index.js";
@@ -39,7 +39,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       },
       {
         name: "get-tasks",
-        description: "Get all tasks.",
+        description: "Get all tasks with optional search and filtering.",
         inputSchema: zodToJsonSchema(operations.GetTasksSchema),
       },
       {
@@ -86,7 +86,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
       return { content: [{ type: "text", text: JSON.stringify(result) }] };
     }
     case "get-tasks": {
-      const result = await operations.fetchTasks(apiKey);
+      const args = operations.GetTasksSchema.parse(request.params.arguments);
+      const result = await operations.fetchTasks(args, apiKey);
       return { content: [{ type: "text", text: JSON.stringify(result) }] };
     }
     case "get-agent-info": {

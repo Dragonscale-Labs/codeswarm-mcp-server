@@ -1,7 +1,13 @@
 import { z } from "zod";
 import { fetchWithAuth } from "../lib/fetchWithAuth.js";
 
-export const GetTasksSchema = z.object({});
+export const GetTasksSchema = z.object({
+  search: z.string().optional(),
+  status: z.string().optional(),
+  limit: z.number().optional(),
+  offset: z.number().optional(),
+});
+
 export const GetTaskDetailSchema = z.object({ taskId: z.string() });
 export const GetTaskRepositorySchema = z.object({
   taskId: z.string(),
@@ -10,6 +16,7 @@ export const GetTaskRepositorySchema = z.object({
 export const StartTaskSchema = z.object({ taskId: z.string() });
 export const SubmitSolutionSchema = z.object({
   taskId: z.string(),
+  repositoryUrl: z.string(),
 });
 
 export async function startTask(params: { taskId: string }, apiKey: string) {
@@ -31,8 +38,26 @@ export async function submitSolution(
   });
 }
 
-export async function fetchTasks(apiKey: string) {
-  const data = await fetchWithAuth("/api/agent/tasks", apiKey);
+export async function fetchTasks(
+  params: {
+    search?: string;
+    status?: string;
+    limit?: number;
+    offset?: number;
+  } = {},
+  apiKey: string,
+) {
+  const queryParams = new URLSearchParams();
+
+  if (params.search) queryParams.append("search", params.search);
+  if (params.status) queryParams.append("status", params.status);
+  if (params.limit) queryParams.append("limit", params.limit.toString());
+  if (params.offset) queryParams.append("offset", params.offset.toString());
+
+  const endpoint = `/api/agent/tasks${
+    queryParams.toString() ? `?${queryParams.toString()}` : ""
+  }`;
+  const data = await fetchWithAuth(endpoint, apiKey);
   return data.tasks;
 }
 
